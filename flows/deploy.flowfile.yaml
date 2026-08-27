@@ -1,0 +1,56 @@
+# Deployment flow
+#
+# Toggles (true/false), set as GitHub Actions inputs:
+#   RUN_SNAPSHOT   - capture a snapshot of the target before deploying
+#   RUN_POLICIES   - run policy checks before deploying
+#
+# Connection values come from environment variables (GitHub Actions secrets):
+#   LB_URL, LB_USER, LB_PASSWORD
+
+globalVariables:
+  RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
+  RUN_POLICIES:     "${RUN_POLICIES:-true}"
+  CHANGELOG_FILE:   "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
+
+  LB_URL:      "${LB_URL:-}"
+  LB_USER:     "${LB_USER:-}"
+  LB_PASSWORD: "${LB_PASSWORD:-}"
+
+stages:
+  Default:
+    actions:
+      # 1) SNAPSHOT (optional) - capture pre-deployment state
+      - type: liquibase
+        if: "RUN_SNAPSHOT == 'true'"
+        command: snapshot
+        cmdArgs:
+          url:       "${LB_URL}"
+          username:  "${LB_USER}"
+          password:  "${LB_PASSWORD}"
+
+      # 2) POLICY CHECKS (optional) - gate the deployment
+      - type: liquibase
+        if: "RUN_POLICIES == 'true'"
+        command: checks run
+        cmdArgs:
+          changelog-file: "${CHANGELOG_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
+
+      # 3) DEPLOY (always runs)
+      - type: liquibase
+        command: update
+        cmdArgs:
+          changelog-file: "${CHANGELOG_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
+
+      # 4) HISTORY (always runs) - confirm what was deployed
+      - type: liquibase
+        command: history
+        cmdArgs:
+          url:       "${LB_URL}"
+          username:  "${LB_USER}"
+          password:  "${LB_PASSWORD}"
