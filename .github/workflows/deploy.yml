@@ -1,0 +1,37 @@
+name: 1 - Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_snapshot:
+        description: 'Take a snapshot before deploying'
+        required: true
+        type: boolean
+        default: true
+      run_policies:
+        description: 'Run policy checks before deploying'
+        required: true
+        type: boolean
+        default: true
+
+env:
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LB_LICENSE_KEY }}
+  LB_URL: ${{ secrets.LB_URL }}
+  LB_USER: ${{ secrets.LB_USERNAME }}
+  LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
+  RUN_SNAPSHOT: ${{ inputs.run_snapshot }}
+  RUN_POLICIES: ${{ inputs.run_policies }}
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: liquibase/setup-liquibase@v2
+        with:
+          version: '5.2.1'
+          edition: 'secure'
+
+      - name: Run deploy flow
+        run: liquibase flow --flow-file=flows/deploy.flowfile.yaml
