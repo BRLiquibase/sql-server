@@ -29,17 +29,20 @@ stages:
       - type: liquibase
         if: "RUN_SNAPSHOT == 'true'"
         command: snapshot
-        outputFile: "snapshots/deploy-snapshot-${RUN_ID}.json"
+        globalArgs:
+          output-file: "snapshots/deploy-snapshot-${RUN_ID}.json"
         cmdArgs:
-          url:      "${LB_URL}"
-          username: "${LB_USER}"
-          password: "${LB_PASSWORD}"
+          url:             "${LB_URL}"
+          username:        "${LB_USER}"
+          password:        "${LB_PASSWORD}"
+          snapshot-format: json
 
       # 2) POLICY CHECKS (optional) - gate the deployment
       - type: liquibase
         if: "RUN_POLICIES == 'true'"
         command: checks run
-        outputFile: "reports/deploy-checks-${RUN_ID}.txt"
+        globalArgs:
+          output-file: "reports/deploy-checks-${RUN_ID}.txt"
         cmdArgs:
           changelog-file: "${CHANGELOG_FILE}"
           url:            "${LB_URL}"
@@ -58,7 +61,8 @@ stages:
       # 4) HISTORY (always runs) - confirm what was deployed
       - type: liquibase
         command: history
-        outputFile: "reports/deploy-history-${RUN_ID}.txt"
+        globalArgs:
+          output-file: "reports/deploy-history-${RUN_ID}.txt"
         cmdArgs:
           url:      "${LB_URL}"
           username: "${LB_USER}"
