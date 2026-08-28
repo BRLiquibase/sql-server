@@ -11,6 +11,7 @@
 #   snapshots/deploy-snapshot-<run>.json
 #   reports/deploy-checks-<run>.txt
 #   reports/deploy-history-<run>.txt
+#   reports/deploy-update-report-<run>.html
 
 globalVariables:
   RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
@@ -57,6 +58,8 @@ stages:
           url:            "${LB_URL}"
           username:       "${LB_USER}"
           password:       "${LB_PASSWORD}"
+          report-path:    "reports"
+          report-name:    "deploy-update-report-${RUN_ID}.html"
 
       # 4) HISTORY (always runs) - confirm what was deployed
       - type: liquibase
