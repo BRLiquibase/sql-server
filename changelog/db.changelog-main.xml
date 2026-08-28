@@ -6,5 +6,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <includeAll path="changelog/changes" relativeToChangelogFile="false"/>
-
+    <includeAll path="changelog/postgres" relativeToChangelogFile="false"/>
 </databaseChangeLog>
