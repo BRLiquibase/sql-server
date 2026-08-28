@@ -1,50 +1,65 @@
-name: 1 - Deploy
+# Deployment flow
+#
+# Toggles (true/false), set as GitHub Actions inputs:
+#   RUN_SNAPSHOT   - capture a snapshot of the target before deploying
+#   RUN_POLICIES   - run policy checks before deploying
+#
+# Connection values come from environment variables (GitHub Actions secrets):
+#   LB_URL, LB_USER, LB_PASSWORD
+#
+# Output:
+#   snapshots/deploy-snapshot-<run>.json
+#   reports/deploy-checks-<run>.txt
+#   reports/deploy-history-<run>.txt
 
-on:
-  workflow_dispatch:
-    inputs:
-      run_snapshot:
-        description: 'Take a snapshot before deploying'
-        required: true
-        type: boolean
-        default: true
-      run_policies:
-        description: 'Run policy checks before deploying'
-        required: true
-        type: boolean
-        default: true
+globalVariables:
+  RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
+  RUN_POLICIES:     "${RUN_POLICIES:-true}"
+  CHANGELOG_FILE:   "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
+  RUN_ID:           "${RUN_ID:-local}"
 
-env:
-  LIQUIBASE_LICENSE_KEY: ${{ secrets.LB_LICENSE_KEY }}
-  LB_URL: ${{ secrets.LB_URL }}
-  LB_USER: ${{ secrets.LB_USERNAME }}
-  LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
-  RUN_SNAPSHOT: ${{ inputs.run_snapshot }}
-  RUN_POLICIES: ${{ inputs.run_policies }}
-  RUN_ID: ${{ github.run_id }}
+  LB_URL:      "${LB_URL:-}"
+  LB_USER:     "${LB_USER:-}"
+  LB_PASSWORD: "${LB_PASSWORD:-}"
 
-jobs:
-  deploy:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
+stages:
+  Default:
+    actions:
+      # 1) SNAPSHOT (optional) - capture pre-deployment state
+      - type: liquibase
+        if: "RUN_SNAPSHOT == 'true'"
+        command: snapshot
+        outputFile: "snapshots/deploy-snapshot-${RUN_ID}.json"
+        cmdArgs:
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
 
-      - uses: liquibase/setup-liquibase@v2
-        with:
-          version: '5.2.1'
-          edition: 'secure'
+      # 2) POLICY CHECKS (optional) - gate the deployment
+      - type: liquibase
+        if: "RUN_POLICIES == 'true'"
+        command: checks run
+        outputFile: "reports/deploy-checks-${RUN_ID}.txt"
+        cmdArgs:
+          changelog-file: "${CHANGELOG_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
 
-      - name: Create output folders
-        run: mkdir -p reports snapshots
+      # 3) DEPLOY (always runs)
+      - type: liquibase
+        command: update
+        cmdArgs:
+          changelog-file: "${CHANGELOG_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
 
-      - name: Run deploy flow
-        run: liquibase flow --flow-file=flows/deploy.flowfile.yaml
-
-      - name: Upload reports and snapshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-output-${{ github.run_id }}
-          path: |
-            reports/
-            snapshots/
+      # 4) HISTORY (always runs) - confirm what was deployed
+      - type: liquibase
+        command: history
+        outputFile: "reports/deploy-history-${RUN_ID}.txt"
+        cmdArgs:
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
