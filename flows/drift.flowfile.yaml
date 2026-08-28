@@ -1,0 +1,39 @@
+# Drift flow
+#
+# Compares a stored snapshot (reference) against a live target environment
+# and writes a changelog of the differences. Does NOT apply anything.
+#
+# Required:
+#   SNAPSHOT_FILE   - path to the snapshot JSON to compare from
+#                     (e.g. snapshots/deploy-snapshot-12345.json)
+#
+# Optional:
+#   SNAPSHOT_DBMS   - dbms the snapshot was taken from (default: mssql)
+#
+# Connection values for the target environment come from environment variables:
+#   LB_URL, LB_USER, LB_PASSWORD
+#
+# Output:
+#   reports/drift-changelog-<run>.sql
+
+globalVariables:
+  SNAPSHOT_FILE:  "${SNAPSHOT_FILE:-}"
+  SNAPSHOT_DBMS:  "${SNAPSHOT_DBMS:-mssql}"
+  RUN_ID:         "${RUN_ID:-local}"
+
+  LB_URL:      "${LB_URL:-}"
+  LB_USER:     "${LB_USER:-}"
+  LB_PASSWORD: "${LB_PASSWORD:-}"
+
+stages:
+  Default:
+    actions:
+      # DIFF-CHANGELOG (always runs) - compare snapshot to target, write SQL changelog, don't apply it
+      - type: liquibase
+        command: diff-changelog
+        cmdArgs:
+          reference-url: "offline:${SNAPSHOT_DBMS}?snapshot=${SNAPSHOT_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
+          changelog-file: "reports/drift-changelog-${RUN_ID}.sql"

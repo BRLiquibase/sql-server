@@ -1,0 +1,94 @@
+name: 3 - Drift
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Environment to compare against'
+        required: true
+        type: choice
+        default: dev
+        options: [dev, test, prod]
+      snapshot_file:
+        description: 'Snapshot filename in snapshots/ (leave blank to use the most recent one)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LB_LICENSE_KEY }}
+  RUN_ID: ${{ github.run_id }}
+
+jobs:
+  drift:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: liquibase/setup-liquibase@v2
+        with:
+          version: '5.2.1'
+          edition: 'secure'
+
+      - name: Create output folder
+        run: mkdir -p reports
+
+      # NOTE: dev/test currently reuse the same secrets as prod (LB_URL/LB_USERNAME/LB_PASSWORD).
+      # Once separate environments exist, add DEV_LB_URL/DEV_LB_USERNAME/DEV_LB_PASSWORD and
+      # TEST_LB_URL/TEST_LB_USERNAME/TEST_LB_PASSWORD as repo secrets and swap them in below.
+      - name: Select target environment
+        run: |
+          case "${{ inputs.target_environment }}" in
+            dev)
+              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
+              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
+              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
+              ;;
+            test)
+              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
+              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
+              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
+              ;;
+            prod)
+              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
+              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
+              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
+              ;;
+          esac
+
+      - name: Select snapshot
+        run: |
+          if [ -n "${{ inputs.snapshot_file }}" ]; then
+            SNAPSHOT="snapshots/${{ inputs.snapshot_file }}"
+          else
+            SNAPSHOT=$(ls -v snapshots/*.json 2>/dev/null | tail -1)
+          fi
+
+          if [ -z "$SNAPSHOT" ] || [ ! -f "$SNAPSHOT" ]; then
+            echo "No snapshot file found. Run the Deploy or Rollback workflow with a snapshot enabled first, or check the filename you passed in."
+            exit 1
+          fi
+
+          echo "Using snapshot: $SNAPSHOT"
+          echo "SNAPSHOT_FILE=$SNAPSHOT" >> "$GITHUB_ENV"
+
+      - name: Run drift flow
+        run: liquibase flow --flow-file=flows/drift.flowfile.yaml
+
+      - name: Upload drift changelog
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-output-${{ github.run_id }}
+          path: reports/drift-changelog-${{ github.run_id }}.sql
+
+      - name: Commit drift changelog to repo
+        if: always()
+        run: |
+          git config user.name "liquibase-bot"
+          git config user.email "liquibase-bot@users.noreply.github.com"
+          git add reports/
+          git commit -m "Drift comparison for run ${{ github.run_id }} (${{ inputs.target_environment }})" || echo "Nothing to commit"
+          git push
