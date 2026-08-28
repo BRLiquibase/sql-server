@@ -1,16 +1,24 @@
-# Deployment flow
+# Rollback flow
 #
-# Toggles (true/false), set as GitHub Actions inputs:
-#   RUN_SNAPSHOT   - capture a snapshot of the target before deploying
-#   RUN_POLICIES   - run policy checks before deploying
+# Toggle (true/false), set as a GitHub Actions input:
+#   RUN_SNAPSHOT   - capture a snapshot of the target before rolling back
+#
+# Required:
+#   DEPLOYMENT_ID  - the deployment ID to roll back (find it with `liquibase history`)
 #
 # Connection values come from environment variables (GitHub Actions secrets):
 #   LB_URL, LB_USER, LB_PASSWORD
+#
+# Output:
+#   snapshots/rollback-snapshot-<run>.json
+#   reports/rollback-status-<run>.txt
+#   reports/rollback-history-<run>.txt
 
 globalVariables:
   RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
-  RUN_POLICIES:     "${RUN_POLICIES:-true}"
+  DEPLOYMENT_ID:    "${DEPLOYMENT_ID:-}"
   CHANGELOG_FILE:   "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
+  RUN_ID:           "${RUN_ID:-local}"
 
   LB_URL:      "${LB_URL:-}"
   LB_USER:     "${LB_USER:-}"
@@ -19,38 +27,42 @@ globalVariables:
 stages:
   Default:
     actions:
-      # 1) SNAPSHOT (optional) - capture pre-deployment state
+      # 1) SNAPSHOT (optional) - capture state before rolling back
       - type: liquibase
         if: "RUN_SNAPSHOT == 'true'"
         command: snapshot
+        outputFile: "snapshots/rollback-snapshot-${RUN_ID}.json"
         cmdArgs:
-          url:       "${LB_URL}"
-          username:  "${LB_USER}"
-          password:  "${LB_PASSWORD}"
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
 
-      # 2) POLICY CHECKS (optional) - gate the deployment
+      # 2) ROLLBACK-ONE-UPDATE (always runs) - rolls back a single deployment, forced
       - type: liquibase
-        if: "RUN_POLICIES == 'true'"
-        command: checks run
+        command: rollback-one-update
+        cmdArgs:
+          changelog-file: "${CHANGELOG_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
+          deploymentId:   "${DEPLOYMENT_ID}"
+          force:          "true"
+
+      # 3) STATUS (always runs) - confirm result
+      - type: liquibase
+        command: status
+        outputFile: "reports/rollback-status-${RUN_ID}.txt"
         cmdArgs:
           changelog-file: "${CHANGELOG_FILE}"
           url:            "${LB_URL}"
           username:       "${LB_USER}"
           password:       "${LB_PASSWORD}"
 
-      # 3) DEPLOY (always runs)
-      - type: liquibase
-        command: update
-        cmdArgs:
-          changelog-file: "${CHANGELOG_FILE}"
-          url:            "${LB_URL}"
-          username:       "${LB_USER}"
-          password:       "${LB_PASSWORD}"
-
-      # 4) HISTORY (always runs) - confirm what was deployed
+      # 4) HISTORY (always runs) - confirm what's applied post-rollback
       - type: liquibase
         command: history
+        outputFile: "reports/rollback-history-${RUN_ID}.txt"
         cmdArgs:
-          url:       "${LB_URL}"
-          username:  "${LB_USER}"
-          password:  "${LB_PASSWORD}"
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
