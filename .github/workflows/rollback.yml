@@ -7,7 +7,7 @@ on:
         description: 'Take a snapshot before rolling back'
         required: true
         type: boolean
-        default: true
+        default: false
 
 env:
   LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
