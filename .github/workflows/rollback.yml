@@ -18,7 +18,7 @@ env:
   LB_URL: ${{ secrets.LB_URL }}
   LB_USER: ${{ secrets.LB_USERNAME }}
   LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
-  DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+  #DEPLOYMENT_ID: ${{ inputs.deployment_id }}
   RUN_SNAPSHOT: ${{ inputs.run_snapshot }}
 
 jobs:
