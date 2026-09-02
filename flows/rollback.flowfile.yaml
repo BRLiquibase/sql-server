@@ -51,3 +51,7 @@ stages:
       # 4) HISTORY (always runs) - confirm what's applied post-rollback
       - type: liquibase
         command: history
+        cmdArgs:
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
