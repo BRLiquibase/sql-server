@@ -3,10 +3,6 @@ name: 2 - Rollback
 on:
   workflow_dispatch:
     inputs:
-      deployment_id:
-        description: 'Deployment ID to roll back (find with liquibase history)'
-        required: true
-        type: string
       run_snapshot:
         description: 'Take a snapshot before rolling back'
         required: true
@@ -18,7 +14,6 @@ env:
   LB_URL: ${{ secrets.LB_URL }}
   LB_USER: ${{ secrets.LB_USERNAME }}
   LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
-  #DEPLOYMENT_ID: ${{ inputs.deployment_id }}
   RUN_SNAPSHOT: ${{ inputs.run_snapshot }}
 
 jobs:
