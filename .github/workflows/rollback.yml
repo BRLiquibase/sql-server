@@ -10,9 +10,9 @@ on:
         default: true
 
 env:
-  LIQUIBASE_LICENSE_KEY: ${{ secrets.LB_LICENSE_KEY }}
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   LB_URL: ${{ secrets.LB_URL }}
-  LB_USER: ${{ secrets.LB_USERNAME }}
+  LB_USER: ${{ secrets.LB_USER }}
   LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
   RUN_SNAPSHOT: ${{ inputs.run_snapshot }}
 

@@ -3,16 +3,14 @@
 # Toggle (true/false), set as a GitHub Actions input:
 #   RUN_SNAPSHOT   - capture a snapshot of the target before rolling back
 #
-# Required:
-#   DEPLOYMENT_ID  - the deployment ID to roll back (find it with `liquibase history`)
+# Always rolls back the most recent deployment.
 #
 # Connection values come from environment variables (GitHub Actions secrets):
 #   LB_URL, LB_USER, LB_PASSWORD
 
 globalVariables:
-  RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
-  #DEPLOYMENT_ID:    "${DEPLOYMENT_ID:-}"
-  CHANGELOG_FILE:   "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
+  RUN_SNAPSHOT:   "${RUN_SNAPSHOT:-true}"
+  CHANGELOG_FILE: "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
 
   LB_URL:      "${LB_URL:-}"
   LB_USER:     "${LB_USER:-}"
@@ -26,20 +24,20 @@ stages:
         if: "RUN_SNAPSHOT == 'true'"
         command: snapshot
         cmdArgs:
-          url:       "${LB_URL}"
-          username:  "${LB_USER}"
-          password:  "${LB_PASSWORD}"
+          url:      "${LB_URL}"
+          username: "${LB_USER}"
+          password: "${LB_PASSWORD}"
 
-      # 2) ROLLBACK-ONE-UPDATE (always runs) - rolls back a single deployment, forced
+      # 2) ROLLBACK-ONE-UPDATE (always runs) - rolls back the most recent deployment, forced
       - type: liquibase
         command: rollback-one-update
         cmdArgs:
-          changelog-file: "${CHANGELOG_FILE}"
-          url:            "${LB_URL}"
-          username:       "${LB_USER}"
-          password:       "${LB_PASSWORD}"
-          ##deploymentId:   "${DEPLOYMENT_ID}"
-          force:          "true"
+          changelog-file:     "${CHANGELOG_FILE}"
+          url:                "${LB_URL}"
+          username:           "${LB_USER}"
+          password:           "${LB_PASSWORD}"
+          last-deployment-id: "true"
+          force:              "true"
 
       # 3) STATUS (always runs) - confirm result
       - type: liquibase
@@ -53,7 +51,3 @@ stages:
       # 4) HISTORY (always runs) - confirm what's applied post-rollback
       - type: liquibase
         command: history
-        cmdArgs:
-          url:       "${LB_URL}"
-          username:  "${LB_USER}"
-          password:  "${LB_PASSWORD}"
