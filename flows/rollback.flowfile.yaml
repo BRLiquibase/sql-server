@@ -11,7 +11,7 @@
 
 globalVariables:
   RUN_SNAPSHOT:     "${RUN_SNAPSHOT:-true}"
-  DEPLOYMENT_ID:    "${DEPLOYMENT_ID:-}"
+  #DEPLOYMENT_ID:    "${DEPLOYMENT_ID:-}"
   CHANGELOG_FILE:   "${CHANGELOG_FILE:-changelog/db.changelog-main.xml}"
 
   LB_URL:      "${LB_URL:-}"
@@ -38,7 +38,7 @@ stages:
           url:            "${LB_URL}"
           username:       "${LB_USER}"
           password:       "${LB_PASSWORD}"
-          deploymentId:   "${DEPLOYMENT_ID}"
+          ##deploymentId:   "${DEPLOYMENT_ID}"
           force:          "true"
 
       # 3) STATUS (always runs) - confirm result
