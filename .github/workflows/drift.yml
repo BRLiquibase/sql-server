@@ -3,12 +3,6 @@ name: 3 - Drift
 on:
   workflow_dispatch:
     inputs:
-      target_environment:
-        description: 'Environment to compare against'
-        required: true
-        type: choice
-        default: dev
-        options: [dev, test, prod]
       snapshot_file:
         description: 'Snapshot filename in snapshots/ (leave blank to use the most recent one)'
         required: false
@@ -20,6 +14,9 @@ permissions:
 env:
   LIQUIBASE_LICENSE_KEY: ${{ secrets.LB_LICENSE_KEY }}
   RUN_ID: ${{ github.run_id }}
+  LB_URL: ${{ secrets.LB_URL }}
+  LB_USER: ${{ secrets.LB_USERNAME }}
+  LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
 
 jobs:
   drift:
@@ -34,29 +31,6 @@ jobs:
 
       - name: Create output folder
         run: mkdir -p reports
-
-      # NOTE: dev/test currently reuse the same secrets as prod (LB_URL/LB_USERNAME/LB_PASSWORD).
-      # Once separate environments exist, add DEV_LB_URL/DEV_LB_USERNAME/DEV_LB_PASSWORD and
-      # TEST_LB_URL/TEST_LB_USERNAME/TEST_LB_PASSWORD as repo secrets and swap them in below.
-      - name: Select target environment
-        run: |
-          case "${{ inputs.target_environment }}" in
-            dev)
-              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
-              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
-              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
-              ;;
-            test)
-              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
-              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
-              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
-              ;;
-            prod)
-              echo "LB_URL=${{ secrets.LB_URL }}" >> "$GITHUB_ENV"
-              echo "LB_USER=${{ secrets.LB_USERNAME }}" >> "$GITHUB_ENV"
-              echo "LB_PASSWORD=${{ secrets.LB_PASSWORD }}" >> "$GITHUB_ENV"
-              ;;
-          esac
 
       - name: Select snapshot
         run: |
@@ -90,5 +64,5 @@ jobs:
           git config user.name "liquibase-bot"
           git config user.email "liquibase-bot@users.noreply.github.com"
           git add reports/
-          git commit -m "Drift comparison for run ${{ github.run_id }} (${{ inputs.target_environment }})" || echo "Nothing to commit"
+          git commit -m "Drift comparison for run ${{ github.run_id }}" || echo "Nothing to commit"
           git push
