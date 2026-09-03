@@ -7,3 +7,5 @@ CREATE TABLE poc_sample (
     created_at TIMESTAMP DEFAULT NOW()
 );
 --rollback DROP TABLE poc_sample;
+
+drop table poc_sample;
