@@ -1,0 +1,108 @@
+Checks-settings File:      liquibase.checks-settings.conf
+=========================================================
+CHANGELOG CHECKS
+----------------
+Checks completed validation of the changelog and found the following issues:
+
+Check Name:         Warn when 'DROP TABLE' detected (ChangeDropTableWarn)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql: Line 10
+Match:              drop table poc_sample;
+Check Severity:     BLOCKER (Return code: 4)
+Message:            Liquibase recommends that changesets which result in tables being dropped are reviewed carefully
+                     to prevent the unintentional loss of data.  Review this changeset to confirm that the referenced
+                    table is being dropped safely.
+
+Check Name:         Warn on Use of User Defined ChangeTypes (DetectChangeType)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql
+Check Severity:     INFO (Return code: 0)
+Message:            Forbidden change type(s) detected in SQL changeset: dropTable.
+
+Check Name:         Changesets Must Have a Label Assigned (ChangesetLabelCheck)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql
+Check Severity:     MAJOR (Return code: 2)
+Message:            Liquibase recommends that labels be assigned to each changeset to provide better deployment
+                     control and to enhance traceability of efforts across changesets.  Review the changeset indicated
+                    and consider adding a label to it.
+
+Check Name:         Changesets Must Have a Context Assigned (ChangesetContextCheck)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql
+Check Severity:     MAJOR (Return code: 2)
+Message:            Liquibase recommends that contexts be assigned to each changeset to provide better deployment
+                     control and to enhance traceability of efforts across changesets. Review the changeset indicated
+                    and consider adding a context to it.
+
+Check Name:         Changesets Must Have a Comment Assigned (ChangesetCommentCheck)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql
+Check Severity:     MINOR (Return code: 1)
+Message:            Liquibase recommends that authors include comments about the purpose and impact of a changeset in
+                     <comment> elements to prevent the development of undocumented or siloed knowledge and ensure that
+                    the purpose of a given changeset is easily understood by other people who use this changelog.
+
+Check Name:         One Change Per Changeset (OneChangePerChangeset)
+Changeset ID:       001-create-sample-table-postgresql
+Changeset Filepath: changelog/postgres/001-create-sample-table.sql
+Check Severity:     INFO (Return code: 0)
+Message:            The changeset contains more than one change type or SQL statement. Changesets with multiple
+                     changes are discouraged to prevent partial execution of the changeset which requires more manual
+                    intervention to correct so that automation can proceed.
+
+Check Name:         Changesets Must Have a Label Assigned (ChangesetLabelCheck)
+Changeset ID:       002-add-status-column-postgresql
+Changeset Filepath: changelog/postgres/002-add-status-column.sql
+Check Severity:     MAJOR (Return code: 2)
+Message:            Liquibase recommends that labels be assigned to each changeset to provide better deployment
+                     control and to enhance traceability of efforts across changesets.  Review the changeset indicated
+                    and consider adding a label to it.
+
+Check Name:         Changesets Must Have a Context Assigned (ChangesetContextCheck)
+Changeset ID:       002-add-status-column-postgresql
+Changeset Filepath: changelog/postgres/002-add-status-column.sql
+Check Severity:     MAJOR (Return code: 2)
+Message:            Liquibase recommends that contexts be assigned to each changeset to provide better deployment
+                     control and to enhance traceability of efforts across changesets. Review the changeset indicated
+                    and consider adding a context to it.
+
+Check Name:         Changesets Must Have a Comment Assigned (ChangesetCommentCheck)
+Changeset ID:       002-add-status-column-postgresql
+Changeset Filepath: changelog/postgres/002-add-status-column.sql
+Check Severity:     MINOR (Return code: 1)
+Message:            Liquibase recommends that authors include comments about the purpose and impact of a changeset in
+                     <comment> elements to prevent the development of undocumented or siloed knowledge and ensure that
+                    the purpose of a given changeset is easily understood by other people who use this changelog.
+
+Changesets Validated: in changelog/postgres/001-create-sample-table.sql
+  ID: 001-create-sample-table-postgresql; Author: liquibase-poc
+
+Changesets Validated: in changelog/postgres/002-add-status-column.sql
+  ID: 002-add-status-column-postgresql; Author: liquibase-poc
+
+Checks run against each changeset:
+  Changesets Must Have a Comment Assigned (Short names: ChangesetCommentCheck)
+  Changesets Must Have a Context Assigned (Short names: ChangesetContextCheck)
+  Changesets Must Have a Label Assigned (Short names: ChangesetLabelCheck)
+  Check Affected Rows Count on Delete (Short names: MaxAffectedRowsAllowedDelete)
+  Check Affected Rows Count on Insert (Short names: MaxAffectedRowsAllowedInsert)
+  Check Affected Rows Count on Update (Short names: MaxAffectedRowsAllowedUpdate)
+  Check Changeset runInTransaction value (Short names: CheckRunInTransactionValue)
+  Check Table Column Count (Short names: TableColumnLimit)
+  Check for Formatted SQL header (Short names: FormattedSqlHeaderRequired)
+  One Change Per Changeset (Short names: OneChangePerChangeset)
+  Require primary key when creating table (Short names: PrimaryKeyOnCreateTable)
+  Rollback Required for Changeset (Short names: RollbackRequired)
+  Warn on Detection of 'GRANT' Statements (Short names: SqlGrantWarn)
+  Warn on Detection of 'REVOKE' Statements (Short names: SqlRevokeWarn)
+  Warn on Detection of 'SELECT *' (Short names: SqlSelectStarWarn)
+  Warn on Detection of 'USE DATABASE' statements (Short names: WarnOnUseDatabase)
+  Warn on Detection of grant that contains 'WITH ADMIN OPTION' (Short names: SqlGrantAdminWarn)
+  Warn on Detection of grant that contains 'WITH GRANT OPTION' (Short names: SqlGrantOptionWarn)
+  Warn on Use of User Defined ChangeTypes (Short names: DetectChangeType)
+  Warn when 'DROP COLUMN' detected (Short names: ChangeDropColumnWarn)
+  Warn when 'DROP TABLE' detected (Short names: ChangeDropTableWarn)
+  Warn when 'MODIFY <column>' detected (Short names: ModifyDataTypeWarn)
+  Warn when 'TRUNCATE TABLE' detected (Short names: ChangeTruncateTableWarn)
+
