@@ -8,4 +8,8 @@ CREATE TABLE poc_sample (
 );
 --rollback DROP TABLE poc_sample;
 
-drop table poc_sample;
+drop table if exists poc_sample;
+
+--changeset liquibase-poc:001-create-sample-table-postgresql-add-index
+CREATE INDEX idx_poc_sample_name ON poc_sample(name);
+--rollback DROP INDEX idx_poc_sample_name;  
