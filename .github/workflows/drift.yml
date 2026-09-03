@@ -17,6 +17,11 @@ env:
   LB_URL: ${{ secrets.LB_URL }}
   LB_USER: ${{ secrets.LB_USERNAME }}
   LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
+  LIQUIBASE_INSIGHTS_ENABLED: 'true'
+  LIQUIBASE_INSIGHTS_API_URL: 'https://insights-demo.liquibase.net/api/operations/ingest'
+  LIQUIBASE_INSIGHTS_AUTH_TOKEN: ${{ secrets.INSIGHTS_API_KEY }}
+  LIQUIBASE_INSIGHTS_CONNECTION_IDENTIFIER: 'riley-github-actions'
+  LIQUIBASE_INSIGHTS_CHANGELOG_IDENTIFIER: 'changelog-humble-numbers'
 
 jobs:
   drift:
