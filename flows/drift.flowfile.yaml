@@ -14,17 +14,14 @@
 #   LB_URL, LB_USER, LB_PASSWORD
 #
 # Output:
-#   reports/drift-changelog-<run>.sql
-
+#   reports/drift-changelog-<run>.mssql.sql
 globalVariables:
   SNAPSHOT_FILE:  "${SNAPSHOT_FILE:-}"
   SNAPSHOT_DBMS:  "${SNAPSHOT_DBMS:-mssql}"
   RUN_ID:         "${RUN_ID:-local}"
-
   LB_URL:      "${LB_URL:-}"
   LB_USER:     "${LB_USER:-}"
   LB_PASSWORD: "${LB_PASSWORD:-}"
-
 stages:
   Default:
     actions:
@@ -36,4 +33,4 @@ stages:
           url:            "${LB_URL}"
           username:       "${LB_USER}"
           password:       "${LB_PASSWORD}"
-          changelog-file: "reports/drift-changelog-${RUN_ID}.sql"
+          changelog-file: "reports/drift-changelog-${RUN_ID}.mssql.sql"
