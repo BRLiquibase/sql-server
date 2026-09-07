@@ -61,7 +61,7 @@ jobs:
           echo "SNAPSHOT_FILE=$SNAPSHOT" >> "$GITHUB_ENV"
 
       - name: Run drift flow
-        run: liquibase flow --flow-file=flows/drift.flowfile.yaml
+        run: liquibase flow --flow-file=flows/drift-compare.flowfile.yaml
 
       - name: Upload drift changelog
         if: always()
