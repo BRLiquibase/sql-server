@@ -1,3 +1,20 @@
+# 2 - Rollback
+#
+# Runs the Liquibase rollback flow (flows/rollback.flowfile.yaml) against
+# the target database on the self-hosted Windows runner.
+#
+# Inputs:
+#   run_snapshot - if true, takes a snapshot of the target DB before rolling
+#                  back (off by default here, unlike Deploy, since rollback
+#                  is usually reacting to a known-bad state rather than
+#                  establishing a new baseline)
+#
+# What this does:
+#   1. Sets up Java + Liquibase Secure on the runner
+#   2. Runs the rollback flow
+#
+# Requires these repo secrets:
+#   LIQUIBASE_LICENSE_KEY, LB_URL, LB_USER, LB_PASSWORD, INSIGHTS_API_KEY
 name: 2 - Rollback
 
 on:
@@ -26,6 +43,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - uses: liquibase/setup-liquibase@v2
         with:

@@ -1,3 +1,26 @@
+# 1 - Deploy
+#
+# Runs the Liquibase deploy flow (flows/deploy.flowfile.yaml) against the
+# target database on the self-hosted Windows runner.
+#
+# Inputs:
+#   run_snapshot  - if true, takes a snapshot of the target DB before deploying
+#                   (used later by the Drift workflow as a comparison baseline)
+#   run_policies  - if true, runs policy checks before deploying; the resulting
+#                   HTML report is moved into reports/ and committed
+#
+# What this does, in order:
+#   1. Sets up Java + Liquibase Secure on the runner
+#   2. Runs the deploy flow
+#   3. Moves the generated policy-checks HTML report into reports/
+#   4. Uploads reports/ and snapshots/ as a workflow artifact
+#   5. Commits reports/ and snapshots/ back to this repo
+#   6. Also pushes the checks report to BRLiquibase/sql-server, using a
+#      separate PAT (CROSS_REPO_TOKEN) since the default token can't write
+#      to a different repo
+#
+# Requires these repo secrets:
+#   LIQUIBASE_LICENSE_KEY, LB_URL, LB_USER, LB_PASSWORD, CROSS_REPO_TOKEN
 name: 1 - Deploy
 on:
   workflow_dispatch:

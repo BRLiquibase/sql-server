@@ -1,3 +1,6 @@
+##TEST MAC VERSION OF DRIFT TEST WORKFLOW. It will look at a snapshot and compare it to the current state of the database, generating a changelog of any differences. It will then either revert the database to the snapshot or document the drift, depending on the direction specified.
+##Files will be built into a reports folder and uploaded as an artifact, and also committed to the repo for reference.
+
 name: 3 - Drift Test
 on:
   workflow_dispatch:

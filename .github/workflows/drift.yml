@@ -1,3 +1,27 @@
+# 3 - Drift
+#
+# Compares a stored snapshot against the live target database and generates
+# a changelog documenting the difference, using flows/drift-compare.flowfile.yaml.
+# Does NOT apply anything, this is comparison/reporting only.
+#
+# Inputs:
+#   snapshot_file - filename of the snapshot to compare against, from snapshots/
+#                   (leave blank to auto-select the most recent one)
+#   direction     - revert-to-snapshot: changelog reverts live back to match
+#                     the snapshot (DROPs/CREATEs to undo drift)
+#                   document-drift-from-snapshot: changelog documents what's
+#                     been added on live since the snapshot (report only,
+#                     not meant to be deployed)
+#
+# What this does, in order:
+#   1. Sets up Java + Liquibase Secure on the runner
+#   2. Selects the snapshot file to compare against
+#   3. Runs the drift-compare flow in the chosen direction
+#   4. Uploads the generated changelog as a workflow artifact
+#   5. Commits the changelog back to this repo under reports/
+#
+# Requires these repo secrets:
+#   LIQUIBASE_LICENSE_KEY, LB_URL, LB_USER, LB_PASSWORD
 name: 3 - Drift
 on:
   workflow_dispatch:
