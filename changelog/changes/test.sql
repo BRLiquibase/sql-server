@@ -1,3 +1,5 @@
+--liquibase formatted sql
+
 --changeset ben.riley:001-01 labels:v1.0 context:dev,uat,prod
 --comment: Create employees table
 CREATE TABLE employees (
