@@ -1,4 +1,4 @@
-name: 5 - Drift Test
+name: 3 - Drift Test
 on:
   workflow_dispatch:
     inputs:
@@ -6,6 +6,14 @@ on:
         description: 'Snapshot filename in snapshots/ (leave blank to use the most recent one)'
         required: false
         type: string
+      direction:
+        description: 'Drift direction'
+        required: true
+        type: choice
+        default: 'revert-to-snapshot'
+        options:
+          - revert-to-snapshot
+          - document-drift-from-snapshot
 permissions:
   contents: write
 env:
@@ -14,6 +22,7 @@ env:
   LB_URL: ${{ secrets.LB_URL }}
   LB_USER: ${{ secrets.LB_USER }}
   LB_PASSWORD: ${{ secrets.LB_PASSWORD }}
+  DIRECTION: ${{ inputs.direction }}
 jobs:
   drift:
     runs-on: [self-hosted, macOS, X64]
@@ -48,6 +57,7 @@ jobs:
           fi
 
           echo "Using snapshot: $SNAPSHOT"
+          echo "Direction: $DIRECTION"
           echo "SNAPSHOT_FILE=$SNAPSHOT" >> "$GITHUB_ENV"
 
       - name: Run drift flow
@@ -88,7 +98,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               path,
-              message: `Drift comparison for run ${{ github.run_id }}`,
+              message: `Drift comparison (${{ inputs.direction }}) for run ${{ github.run_id }}`,
               content: contentEncoded,
               sha,
             });

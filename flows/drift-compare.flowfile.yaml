@@ -1,0 +1,55 @@
+# Drift compare flow
+#
+# Compares a stored snapshot against a live target environment.
+#
+# DIRECTION controls which way the changelog is generated:
+#   revert-to-snapshot          - target=live, reference=snapshot
+#                                  changelog reverts live back to match the snapshot (DROPs/CREATEs to undo drift)
+#   document-drift-from-snapshot - target=snapshot, reference=live
+#                                  changelog documents what's been added on live since the snapshot (report only, not deployable)
+#
+# Required:
+#   SNAPSHOT_FILE   - path to the snapshot JSON to compare from
+#                     (e.g. snapshots/deploy-snapshot-12345.json)
+#   DIRECTION       - revert-to-snapshot | document-drift-from-snapshot
+#
+# Optional:
+#   SNAPSHOT_DBMS   - dbms the snapshot was taken from (default: mssql)
+#
+# Connection values for the target environment come from environment variables:
+#   LB_URL, LB_USER, LB_PASSWORD
+#
+# Output:
+#   reports/drift-changelog-<run>.mssql.sql
+globalVariables:
+  SNAPSHOT_FILE:  "${SNAPSHOT_FILE:-}"
+  SNAPSHOT_DBMS:  "${SNAPSHOT_DBMS:-mssql}"
+  DIRECTION:      "${DIRECTION:-revert-to-snapshot}"
+  RUN_ID:         "${RUN_ID:-local}"
+  LB_URL:      "${LB_URL:-}"
+  LB_USER:     "${LB_USER:-}"
+  LB_PASSWORD: "${LB_PASSWORD:-}"
+stages:
+  Default:
+    actions:
+      # Revert direction: reference = snapshot, target = live
+      - type: liquibase
+        command: diff-changelog
+        if: "DIRECTION == 'revert-to-snapshot'"
+        cmdArgs:
+          reference-url: "offline:${SNAPSHOT_DBMS}?snapshot=${SNAPSHOT_FILE}"
+          url:            "${LB_URL}"
+          username:       "${LB_USER}"
+          password:       "${LB_PASSWORD}"
+          changelog-file: "reports/drift-changelog-${RUN_ID}.mssql.sql"
+
+      # Document direction: reference = live, target = snapshot
+      - type: liquibase
+        command: diff-changelog
+        if: "DIRECTION == 'document-drift-from-snapshot'"
+        cmdArgs:
+          reference-url: "${LB_URL}"
+          reference-username: "${LB_USER}"
+          reference-password: "${LB_PASSWORD}"
+          url:            "offline:${SNAPSHOT_DBMS}?snapshot=${SNAPSHOT_FILE}"
+          changelog-file: "reports/drift-changelog-${RUN_ID}.mssql.sql"
