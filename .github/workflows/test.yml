@@ -39,6 +39,11 @@ jobs:
           version: '5.2.1'
           edition: 'secure'
 
+      - name: Install sqlcmd
+        run: |
+          brew install sqlcmd
+          sqlcmd -\? > /dev/null && echo "sqlcmd runs OK"
+
       - name: Create output folders
         run: mkdir -p reports snapshots
 
