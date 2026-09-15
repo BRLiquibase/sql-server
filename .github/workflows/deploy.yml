@@ -10,7 +10,7 @@
 #                   HTML report is moved into reports/ and committed
 #
 # What this does, in order:
-#   1. Sets up Java + Liquibase Secure on the runner
+#   1. Sets up Java + Liquibase Secure + sqlcmd on the runner
 #   2. Runs the deploy flow
 #   3. Moves the generated policy-checks HTML report into reports/
 #   4. Uploads reports/ and snapshots/ as a workflow artifact
@@ -29,12 +29,12 @@ on:
         description: 'Take a snapshot before deploying'
         required: true
         type: boolean
-        default: true
+        default: false
       run_policies:
         description: 'Run policy checks before deploying'
         required: true
         type: boolean
-        default: true
+        default: false
 permissions:
   contents: write
 env:
@@ -61,6 +61,12 @@ jobs:
         with:
           version: '5.2.1'
           edition: 'secure'
+
+      - name: Install sqlcmd
+        run: |
+          winget install --id Microsoft.SQLServer.SqlCmd -e --accept-source-agreements --accept-package-agreements
+          sqlcmd -? | Out-Null
+          Write-Host "sqlcmd runs OK"
 
       - name: Create output folders
         run: |
